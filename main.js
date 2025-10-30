@@ -17,13 +17,8 @@ function findMapValue(map, searchedVal) {
  */
 function error(msg) {
 	console.error(msg);
-	output.innerHTML = "<span class='error'>Error: "+ msg +"</span>";
+	document.body.querySelector('output').innerHTML = "<span class='error'>Error: "+ msg +"</span>";
 }
-
-/**
- * @var {Map<int, int>} jojo
- */
-var jojo;
 
 class InterpreterState {
 	/** @type {Map<int, int>} */
@@ -94,13 +89,13 @@ class InterpreterState {
 		let memsize = 30000;
 		
 		while(this.code.startsWith("!")) {
-			if(this.code.startsWith("!init "))
+			if(this.code.startsWith("!*= "))		// read: "everthing is..."
 				fillWith = parseInt(/\d+/.exec(this.code)[0]);
 			
-			else if(this.code.startsWith("!memsize "))
+			else if(this.code.startsWith("!#Mc= "))	//read: "The memory cell count is..."
 				memsize = parseInt(/\d+/.exec(this.code)[0]);
 			
-			else if(this.code.startsWith("!enablefunctions"))
+			else if(this.code.startsWith("!$()"))
 				this.functionsEnabled = true;
 			
 			this.memory = new Uint8Array(memsize);
@@ -111,54 +106,51 @@ class InterpreterState {
 }
 
 /**
- * If they are enabled, interpret the funcrions.
+ * If they are enabled, interpret the functions.
  * @param {InterpreterState} state
- * @returns {bool} if the function ended withput error any.
  */
 function interpretFunctions(state) {
 	if(!state.functionsEnabled)
 		return;
 	
-	for(const fun of ["moveto", "putchar"]) {
-		if(state.code.length <= fun.length + state.instructionPtr + 2)
-			continue;
-		if(state.code.slice(state.instructionPtr + 1, fun.length + state.instructionPtr + 1) != fun || state.code[fun.length + state.instructionPtr + 1] != '(')
+	for(const fun of ["<>", "="]) {
+		if(
+				state.code.length <= fun.length + state.instructionPtr + 2									// check overflow
+				|| state.code.slice(state.instructionPtr + 1, fun.length + state.instructionPtr + 1) != fun	// check the name
+				|| state.code[fun.length + state.instructionPtr + 1] != '('									// check the opening parn
+		)
 			continue;
 		
 		state.instructionPtr += fun.length + 2;
 		switch(fun) {
-			case "moveto":
+			case "<>":
 				if(!/\d/.test(state.instruction)) {
-					error("moveto() expects 1 integer argument.");
+					error("<>() (moveto) expects 1 integer argument.");
 					return false;
 				}
 				
 				const addressStr = /\d+/.exec(state.code.slice(state.instructionPtr))[0];
 				state.instructionPtr += addressStr.length;
 				if(state.instruction != ')'){
-					error("moveto() expects only 1 integer argument.");
+					error("<>() (moveto) expects only 1 integer argument.");
 					return false;
 				}
 				
 				state.memPtr = parseInt(addressStr);
 				break;
-			case "putchar":
+			case "=":
 				if(state.nextInstruction != ')') {
-					error("put_char() expects 1 charcter.");
+					error("=() (putchar) expects 1 charcter.");
 					return false;
 				}
 				
 				state.cellValue = state.instruction.charCodeAt(0);
 				state.instructionPtr++;
 				break;
-			default:
-				error(`Unknown function "${fun}()".`);
-				return false;
+			// there's no default since they don't pass the two first checks
 		}
-		//instructionPtr should point on the closing parenthesis
-		//if adding something in the case, declare a variable to see if the exit was because of an error.
 	}
-	return true;
+	//instructionPtr should point on the closing parenthesis
 }
 
 
@@ -170,7 +162,6 @@ function execute_brainfuck(state = new InterpreterState()) {
 	const output = document.body.querySelector('output');
 	output.innerText = '';
 	
-	//main loop
 	for(; state.instructionPtr < state.code.length; state.instructionPtr++) {
 		switch(state.instruction) {
 			case '>':
@@ -215,8 +206,7 @@ function execute_brainfuck(state = new InterpreterState()) {
 				state.instructionPtr = newPtr;
 				break;
 			case '$':
-				if(!interpretFunctions(state))
-					return;
+				interpretFunctions(state);
 			default:
 				continue;
 		}
