@@ -28,7 +28,7 @@ class InterpreterState {
 	/** @type {Uint8Array} */
 	memory;
 	/** @type {int} */
-	memPtr = 0;
+	dataPtr = 0;
 	/** @type {int} */
 	instructionPtr;
 	/** @type {bool} */
@@ -41,11 +41,11 @@ class InterpreterState {
 		
 		this.code	= input.value;
 		this.memory	= new Uint8Array(30000);
-		this.memPtr	= 0;
+		this.dataPtr	= 0;
 		this.instructionPtr = 0;
 		this.bracketCorrespondances = new Map();
 		
-		this.readPreprocessors();
+		this.readDirectives();
 		this.#initializeBracketMap()
 	}
 	
@@ -57,11 +57,11 @@ class InterpreterState {
 	}
 	
 	get cellValue() {
-		return this.memory[this.memPtr];
+		return this.memory[this.dataPtr];
 	}
 	/** @param {int} val */
 	set cellValue(val) {
-		this.memory[this.memPtr] = val;
+		this.memory[this.dataPtr] = val;
 	}
 	
 	#initializeBracketMap() {
@@ -84,7 +84,7 @@ class InterpreterState {
 		}
 	}
 	
-	readPreprocessors() {
+	readDirectives() {
 		let fillWith = 0;
 		let memsize = 30000;
 		
@@ -136,7 +136,7 @@ function interpretFunctions(state) {
 					return false;
 				}
 				
-				state.memPtr = parseInt(addressStr);
+				state.dataPtr = parseInt(addressStr);
 				break;
 			case "=":
 				if(state.nextInstruction != ')') {
@@ -165,13 +165,13 @@ function execute_brainfuck(state = new InterpreterState()) {
 	for(; state.instructionPtr < state.code.length; state.instructionPtr++) {
 		switch(state.instruction) {
 			case '>':
-				if(++state.memPtr >= state.memory.length) {
+				if(++state.dataPtr >= state.memory.length) {
 					error(`Memory pointer too large (over ${state.memory.length}).`)
 					return;
 				}
 				break;
 			case '<':
-				if(--state.memPtr < 0) {
+				if(--state.dataPtr < 0) {
 					error("Memory pointer negative.")
 					return;
 				}
