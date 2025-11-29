@@ -23,7 +23,7 @@ The code inside the brackets will run as long as when the end (or start) is reac
 
 ## Added stuff
 ### The interpreter directives
-All dirctives are at the start of the file, begin by a `!` and are separated by new lines.
+All directives are at the start of the file, begin by a `!` and are separated by new lines.
 > `!*= integer`
 
 Read as "everything equals", it sets every cell value to the given integer.
@@ -32,7 +32,7 @@ By default:
 !*= 0
 ```
 
-> <span id='mc'> `#Mc= integer`</span>
+> <span id='mc'>`#Mc= integer`</span>
 
 Read as "Memory cell count equals", it sets the upper limit of the cell pointer.
 By default:

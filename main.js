@@ -41,7 +41,7 @@ class InterpreterState {
 		
 		this.code	= input.value;
 		this.memory	= new Uint8Array(30000);
-		this.dataPtr	= 0;
+		this.dataPtr		= 0;
 		this.instructionPtr = 0;
 		this.bracketCorrespondances = new Map();
 		
