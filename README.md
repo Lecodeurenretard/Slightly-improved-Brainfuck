@@ -1,5 +1,7 @@
 # Brainfuck but less annoying
 A quick implementation of [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck). <!--So many "fuck"s, the censors are gonna kill me-->
+
+A better version of this has been made in [BF-Tools](https://github.com/Lecodeurenretard/BF-Tools).
 ## Brainfuck features
 > `.`  
 
